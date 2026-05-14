@@ -1,6 +1,35 @@
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import ProductCard from "../components/ProductCard";
+import { BudgetContext } from "../context/BudgetContext";
 
 function Home() {
+    const { budgetMode } = useContext(BudgetContext);
+
+    const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        fetch("https://fakestoreapi.com/products")
+            .then((res) => res.json())
+            .then((data) => {
+                const selectedProducts = data.slice(0, 4);
+                setFeaturedProducts(selectedProducts);
+            })
+            .catch((err) => {
+                console.error(err);
+                setError("Errore nel caricamento dei prodotti in evidenza.");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }, []);
+
+    const visibleFeaturedProducts = budgetMode
+        ? featuredProducts.filter((product) => product.price <= 30)
+        : featuredProducts;
+
     return (
         <>
             <section className="home-hero">
@@ -69,48 +98,35 @@ function Home() {
                         <div>
                             <h2>Articoli in Evidenza</h2>
                             <p>I più amati dalla nostra community</p>
+
+                            {budgetMode && (
+                                <p className="text-warning fw-bold">
+                                    Modalità Budget attiva: articoli fino a 30€.
+                                </p>
+                            )}
                         </div>
 
                         <Link to="/products">Vedi tutta la collezione</Link>
                     </div>
 
-                    <div className="row g-4">
-                        <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="featured-card">
-                                <div className="featured-img red-shoe"></div>
-                                <span>Calzature</span>
-                                <h3>Velocity Pro Sneaker</h3>
-                                <strong>€129,00</strong>
-                            </div>
-                        </div>
+                    {loading && <p>Caricamento articoli in evidenza...</p>}
 
-                        <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="featured-card">
-                                <div className="featured-img sunglasses"></div>
-                                <span>Accessori</span>
-                                <h3>Lumina Shade Classic</h3>
-                                <strong>€85,00</strong>
-                            </div>
-                        </div>
+                    {error && <p className="text-danger">{error}</p>}
 
-                        <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="featured-card">
-                                <div className="featured-img camera"></div>
-                                <span>Tech</span>
-                                <h3>RetroSnap Camera</h3>
-                                <strong>€159,00</strong>
-                            </div>
-                        </div>
+                    {!loading && !error && visibleFeaturedProducts.length === 0 && (
+                        <p>Nessun articolo in evidenza disponibile in modalità budget.</p>
+                    )}
 
-                        <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="featured-card">
-                                <div className="featured-img bag"></div>
-                                <span>Moda</span>
-                                <h3>Urban Leather Tote</h3>
-                                <strong>€210,00</strong>
-                            </div>
+                    {!loading && !error && visibleFeaturedProducts.length > 0 && (
+                        <div className="row g-4">
+                            {visibleFeaturedProducts.map((product) => (
+                                <div className="col-12 col-sm-6 col-lg-3" key={product.id}>
+                                    <ProductCard product={product} />
+                                </div>
+                            ))}
                         </div>
-                    </div>
+                    )}
+                    
                 </div>
             </section>
 
