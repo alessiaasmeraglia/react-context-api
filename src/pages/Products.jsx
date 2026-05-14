@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
+import { BudgetContext } from "../context/BudgetContext";
 
 function Products() {
+    const { budgetMode } = useContext(BudgetContext);
+
     const [products, setProducts] = useState([]);
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState("all");
@@ -29,8 +32,9 @@ function Products() {
     let filteredProducts = products.filter((product) => {
         const matchTitle = product.title.toLowerCase().includes(search.toLowerCase());
         const matchCategory = category === "all" || product.category === category;
+        const matchBudget = !budgetMode || product.price <= 30;
 
-        return matchTitle && matchCategory;
+        return matchTitle && matchCategory && matchBudget;
     });
 
     if (sortOrder === "asc") {
@@ -52,20 +56,22 @@ function Products() {
     return (
         <section className="products-page">
             <div className="container">
-                <div className="breadcrumb-luxe">
-                    Home › <strong>Prodotti</strong>
-                </div>
+                <div className="mb-4">
+                    <h1>Prodotti</h1>
 
-                <div className="row justify-content-between align-items-start mb-5 g-4">
-                    <div className="col-12 col-lg-7">
-                        <h1>I Nostri Prodotti</h1>
-                        <p>
-                            Esplora la nostra selezione esclusiva di articoli premium. Ogni
-                            pezzo è curato per garantire la massima qualità e un design senza
-                            tempo.
+                    <p>
+                        Esplora la nostra selezione esclusiva di articoli premium. Ogni
+                        pezzo è curato per garantire la massima qualità e un design senza
+                        tempo.
+                    </p>
+
+                    {budgetMode && (
+                        <p className="alert alert-warning">
+                            Modalità Budget attiva: stai vedendo solo prodotti fino a 30€.
                         </p>
-                    </div>
-
+                    )}
+                </div>
+                <div className="row justify-content-between align-items-start mb-5 g-4">
                     <div className="col-12 col-lg-4">
                         <input
                             type="text"
