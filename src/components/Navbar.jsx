@@ -1,6 +1,10 @@
 import { NavLink } from "react-router-dom";
+import { useContext } from "react";
+import { BudgetContext } from "../context/BudgetContext";
 
 function Navbar() {
+    const { budgetMode, setBudgetMode } = useContext(BudgetContext);
+
     return (
         <nav className="navbar navbar-expand-lg luxe-navbar border-bottom">
             <div className="container-fluid px-4 px-lg-5">
@@ -41,11 +45,13 @@ function Navbar() {
                         </li>
                     </ul>
 
-                    <div className="d-flex align-items-center gap-3 nav-icons">
-                        <span>⌕</span>
-                        <span>🛒</span>
-                        <span>♙</span>
-                    </div>
+                    <button
+                        type="button"
+                        className={budgetMode ? "btn btn-warning" : "btn btn-outline-primary"}
+                        onClick={() => setBudgetMode(!budgetMode)}
+                    >
+                        {budgetMode ? "Disattiva Modalità Budget" : "Attiva Modalità Budget"}
+                    </button>
                 </div>
             </div>
         </nav>
